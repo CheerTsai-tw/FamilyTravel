@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>東北七日遊 (Tohoku Trip)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- 基礎設定 & 日式極簡配色 --- */
+        :root {
+            --bg-color: #F7F7F7;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --accent-color: #4A6C74; /* 青鈍色 */
+            --highlight-food: #D98E73; /* 煉瓦色 */
+            --highlight-shop: #8EACBB;
+            --tag-transport: #E0E0E0;
+            --flight-color: #2C3E50;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; padding: 0; padding-bottom: 90px;
+        }
+
+        /* --- 頂部日期導航 --- */
+        .day-scroller {
+            background: rgba(255,255,255,0.98);
+            padding: 12px 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .day-chip {
+            display: inline-block;
+            padding: 6px 14px;
+            margin-right: 6px;
+            border-radius: 20px;
+            background: #F0F0F0;
+            color: #999;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .day-chip.active {
+            background: var(--accent-color);
+            color: #FFF;
+            box-shadow: 0 2px 6px rgba(74, 108, 116, 0.4);
+        }
+
+        /* --- 內容容器 --- */
+        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+        /* --- 天氣 Widget --- */
+        .weather-widget {
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #445;
+            box-shadow: 0 2px 8px rgba(161, 196, 253, 0.3);
+        }
+
+        /* --- 卡片樣式 --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+        .card.sightseeing { border-left-color: var(--accent-color); }
+        .card.food { border-left-color: var(--highlight-food); }
+        .card.transport { border-left-color: var(--tag-transport); background: #FCFCFC; }
+        .card.hotel { border-left-color: #9B59B6; }
+        .card.flight { border-left-color: var(--flight-color); border: 1px solid #E8E8E8; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .card-time { font-size: 18px; font-weight: 700; color: var(--accent-color); font-family: 'Helvetica Neue', sans-serif; }
+        .card-title { font-size: 17px; font-weight: 700; margin: 4px 0 8px 0; line-height: 1.4; }
+        .card-meta { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+        
+        /* --- 標籤與按鈕 --- */
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; display: inline-block; margin: 0 2px; }
+        .tag.eat { background-color: var(--highlight-food); }
+        .tag.buy { background-color: var(--highlight-shop); }
+        .tag.alert { background-color: #E74C3C; }
+        .tag.code { background-color: #2C3E50; color: #FFF; font-family: monospace; letter-spacing: 1px; padding: 2px 8px; }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            background: #F0F4F5;
+            color: var(--accent-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+        .nav-btn:active { background: #E0E4E5; }
+        .nav-btn i { margin-right: 6px; }
+
+        /* --- 底部導航 --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #FFF;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #EEE;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { text-align: center; color: #BBB; font-size: 10px; cursor: pointer; padding: 5px; width: 100%; }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+
+        /* --- 工具頁面 --- */
+        .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .tool-card { 
+            background: #FFF; padding: 20px; border-radius: 12px; text-align: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer;
+        }
+        .tool-card:active { transform: scale(0.98); }
+        
+        /* 隱藏/顯示控制 */
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 彈窗樣式 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 999;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal {
+            background: white; width: 85%; max-width: 400px;
+            border-radius: 16px; padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="day-nav" class="day-scroller"></div>
+
+    <div class="container">
+        
+        <div id="view-itinerary" class="view-section active">
+            <div class="weather-widget">
+                <div>
+                    <strong id="weather-loc" style="font-size:18px;">正在載入...</strong>
+                    <div id="weather-desc" style="font-size:13px; opacity:0.8;">預報功能準備中</div>
+                </div>
+                <i class="fas fa-cloud-sun" style="font-size:24px; opacity:0.6;"></i>
+            </div>
+            <div id="cards-container"></div>
+        </div>
+
+        <div id="view-tools" class="view-section">
+            <h2 style="font-size:20px; margin: 10px 0 20px 0; color:var(--text-main);">旅程百寶箱</h2>
+            <div class="tools-grid">
+                <div class="tool-card" onclick="showFlightInfo()">
+                    <i class="fas fa-plane" style="color:#2C3E50; font-size:28px; margin-bottom:10px;"></i>
+                    <h3>航班資訊</h3>
+                    <p style="font-size:12px; color:#999;">JX862 / JX863</p>
+                </div>
+                <div class="tool-card">
+                    <i class="fas fa-bed" style="color:#9B59B6; font-size:28px; margin-bottom:10px;"></i>
+                    <h3>住宿總覽</h3>
+                    <p style="font-size:12px; color:#999;">飯店與訂單</p>
+                </div>
+                <div class="tool-card">
+                    <i class="fas fa-wallet" style="color:#F39C12; font-size:28px; margin-bottom:10px;"></i>
+                    <h3>公費記帳</h3>
+                    <p style="font-size:12px; color:#999;">剩餘預算</p>
+                </div>
+                <div class="tool-card" style="border: 1px solid #FFCDD2;">
+                    <i class="fas fa-phone-alt" style="color:#E74C3C; font-size:28px; margin-bottom:10px;"></i>
+                    <h3>緊急聯絡</h3>
+                    <p style="font-size:12px; color:#999;">保險/報案</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('itinerary')">
+            <i class="fas fa-map-marked-alt"></i>
+            <div>行程</div>
+        </div>
+        <div class="nav-item" onclick="switchView('tools')">
+            <i class="fas fa-suitcase"></i>
+            <div>工具</div>
+        </div>
+    </div>
+
+    <div id="modal-flight" class="modal-overlay" onclick="this.style.display='none'">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">✈️ 航班資訊</h3>
+            <div style="margin-bottom:15px;">
+                <div style="font-weight:bold; color:var(--accent-color);">去程 | 12/06 (六)</div>
+                <div style="font-size:14px; margin-top:5px;">
+                    <strong>JX862 星宇航空</strong><br>
+                    11:50 TPE 桃園 T1<br>
+                    ⬇ (3h 10m)<br>
+                    16:00 SDJ 仙台
+                </div>
+            </div>
+            <div>
+                <div style="font-weight:bold; color:var(--accent-color);">回程 | 12/12 (五)</div>
+                <div style="font-size:14px; margin-top:5px;">
+                    <strong>JX863 星宇航空</strong><br>
+                    17:15 SDJ 仙台<br>
+                    ⬇ (4h 20m)<br>
+                    20:35 TPE 桃園 T1
+                </div>
+            </div>
+            <button onclick="document.getElementById('modal-flight').style.display='none'" style="width:100%; margin-top:20px; padding:10px; background:#f0f0f0; border:none; border-radius:8px;">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 核心資料區 (您餵給我的資料都在這) ---
+        const itineraryData = {
+            "day1": { 
+                date: "12/06 (六)", 
+                loc: "仙台市", 
+                temp: "3°C - 8°C",
+                events: [
+                    { 
+                        time: "09:30", 
+                        title: "抵達桃園機場 T1", 
+                        type: "transport", 
+                        note: "建議提早 2.5 小時抵達櫃檯報到。<br>備註：星宇航空位於第一航廈。", 
+                        nav: "桃園機場第一航廈" 
+                    },
+                    { 
+                        time: "11:50", 
+                        title: "JX862 起飛 🛫", 
+                        type: "flight", 
+                        note: "機型：A330-900NEO<br>飛行時間：3小時10分<br>目的地：仙台 (SDJ)", 
+                        nav: "" 
+                    },
+                    { 
+                        time: "16:00", 
+                        title: "抵達仙台機場", 
+                        type: "transport", 
+                        note: "入境審查約需 40-60 分鐘。<br>領完行李請前往 2F 連接通道搭乘電車。", 
+                        nav: "仙台空港駅" 
+                    },
+                    { 
+                        time: "17:08", 
+                        title: "搭乘仙台空港線", 
+                        type: "transport", 
+                        note: "<b>最佳班次：17:08 發 → 17:33 著</b><br>(備用班次：17:39 發 → 18:04 著)<br>前往：JR 仙台站", 
+                        nav: "" 
+                    },
+                    { 
+                        time: "18:00", 
+                        title: "飯店 Check-in", 
+                        type: "hotel", 
+                        note: "<b>Hotel Livemax Sendai Hirose-dori</b><br>預約代號：<span class='tag code'>1628181511</span><br>電話：022-263-6400<br>從仙台站步行約 15 分或搭計程車。", 
+                        nav: "ホテルリブマックス仙台広瀬通" 
+                    },
+                    { 
+                        time: "19:00", 
+                        title: "晚餐推薦：仙台牛舌", 
+                        type: "food", 
+                        note: "飯店附近名店推薦：<br>1. <span class='tag eat'>味太助 本店</span> (發源店)<br>2. <span class='tag eat'>牛舌料理 閣</span> (評價高)<br>記得點厚切牛舌定食！", 
+                        nav: "味太助 本店" 
+                    }
+                ]
+            },
+            "day2": { date: "12/07 (日)", loc: "松島灣", temp: "2°C - 7°C", events: [] },
+            "day3": { date: "12/08 (一)", loc: "銀山溫泉", temp: "-1°C - 4°C", events: [] },
+            "day4": { date: "12/09 (二)", loc: "藏王溫泉", temp: "-3°C - 2°C", events: [] },
+            "day5": { date: "12/10 (三)", loc: "米澤", temp: "0°C - 5°C", events: [] },
+            "day6": { date: "12/11 (四)", loc: "狐狸村/仙台", temp: "2°C - 7°C", events: [] },
+            "day7": { 
+                date: "12/12 (五)", 
+                loc: "回程", 
+                temp: "4°C - 9°C", 
+                events: [
+                    { 
+                        time: "15:15", 
+                        title: "抵達仙台機場", 
+                        type: "transport", 
+                        note: "建議提早 2 小時抵達辦理登機。<br>最後採買伴手禮 (毛豆奶昔、萩之月)。", 
+                        nav: "仙台空港" 
+                    },
+                    { 
+                        time: "17:15", 
+                        title: "JX863 起飛 🛫", 
+                        type: "flight", 
+                        note: "機型：A330-900NEO<br>飛行時間：4小時20分<br>目的地：TPE (20:35 抵達)", 
+                        nav: "" 
+                    }
+                ] 
+            }
+        };
+
+        // --- 程式邏輯區 ---
+        let currentDay = "day1";
+
+        function init() {
+            renderDayNav();
+            renderCards(currentDay);
+        }
+
+        function renderDayNav() {
+            const nav = document.getElementById('day-nav');
+            nav.innerHTML = '';
+            Object.keys(itineraryData).forEach((key, index) => {
+                const day = itineraryData[key];
+                const chip = document.createElement('span');
+                chip.className = `day-chip ${key === currentDay ? 'active' : ''}`;
+                chip.innerHTML = `Day ${index+1} <small>${day.date.split(' ')[0]}</small>`;
+                chip.onclick = () => {
+                    currentDay = key;
+                    updateActiveDay();
+                    renderCards(key);
+                };
+                nav.appendChild(chip);
+            });
+        }
+
+        function updateActiveDay() {
+            document.querySelectorAll('.day-chip').forEach(el => {
+                el.classList.remove('active');
+                if(el.textContent.includes(itineraryData[currentDay].date.split(' ')[0])) el.classList.add('active');
+            });
+        }
+
+        function renderCards(dayKey) {
+            const container = document.getElementById('cards-container');
+            const dayInfo = itineraryData[dayKey];
+            
+            // 更新天氣 header
+            document.getElementById('weather-loc').innerText = dayInfo.loc;
+            document.getElementById('weather-desc').innerText = `氣溫預測: ${dayInfo.temp}`;
+
+            container.innerHTML = '';
+
+            if(!dayInfo.events || dayInfo.events.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#AAA;"><i class="fas fa-edit"></i><br><br>行程整理中...</div>';
+                return;
+            }
+
+            dayInfo.events.forEach(event => {
+                const card = document.createElement('div');
+                card.className = `card ${event.type}`;
+                
+                let navButtonHtml = '';
+                if (event.nav) {
+                    const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.nav)}`;
+                    navButtonHtml = `
+                        <a href="${mapLink}" target="_blank" class="nav-btn">
+                            <i class="fas fa-location-arrow"></i> 導航：${event.nav}
+                        </a>`;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-time">${event.time}</div>
+                        ${event.type === 'flight' ? '<i class="fas fa-plane" style="color:#2C3E50"></i>' : ''}
+                        ${event.type === 'hotel' ? '<i class="fas fa-bed" style="color:#9B59B6"></i>' : ''}
+                    </div>
+                    <div class="card-title">${event.title}</div>
+                    <div class="card-meta">${event.note}</div>
+                    ${navButtonHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            
+            if(viewName === 'itinerary') {
+                document.querySelector('.bottom-nav .nav-item:nth-child(1)').classList.add('active');
+                document.getElementById('day-nav').style.display = 'block';
+            } else {
+                document.querySelector('.bottom-nav .nav-item:nth-child(2)').classList.add('active');
+                document.getElementById('day-nav').style.display = 'none';
+            }
+        }
+
+        function showFlightInfo() {
+            document.getElementById('modal-flight').style.display = 'flex';
+        }
+
+        init();
+    </script>
+</body>
+</html>
