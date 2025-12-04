@@ -174,9 +174,19 @@
             font-size: 20px; color: #999; cursor: pointer; padding: 5px;
         }
         .modal h3 { margin-top: 0; color: var(--accent-color); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
-        .modal h4 { margin: 15px 0 5px 0; color: var(--highlight-food); font-size: 15px; }
+        .modal h4 { margin: 20px 0 10px 0; color: var(--highlight-food); font-size: 16px; border-left: 4px solid var(--highlight-food); padding-left: 8px; }
         .modal p, .modal li { font-size: 14px; line-height: 1.6; color: #555; }
         .modal ul { padding-left: 20px; margin: 5px 0; }
+        
+        /* 圖片樣式更新 */
+        .modal img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #EEE;
+        }
+
         .step-num { display: inline-block; width: 20px; height: 20px; background: #333; color: white; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; margin-right: 5px; }
     </style>
 </head>
@@ -237,7 +247,7 @@
 
     <div id="modal-flight" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal" onclick="event.stopPropagation()">
-            <div class="modal-close" onclick="closeAllModals()">&times;</div>
+            <div class="modal-close" onclick="closeAllModals()">×</div>
             <h3>✈️ 航班資訊</h3>
             <div style="margin-bottom:15px;">
                 <div style="font-weight:bold; color:var(--accent-color);">去程 | 12/06 (六)</div>
@@ -258,27 +268,32 @@
 
     <div id="modal-market" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal" onclick="event.stopPropagation()">
-            <div class="modal-close" onclick="closeAllModals()">&times;</div>
+            <div class="modal-close" onclick="closeAllModals()">×</div>
             <h3>🍣 鹽釜市場攻略</h3>
             
-            <h4>必吃：三陸鹽竈 Higashimono</h4>
-            <p>9月中-12月限定的極品大目鮪（メバチマグロ）。<br>
-            <small>⚠️ 挑選認明「三陸塩竈ひがしもの」貼紙。</small></p>
-            <img src="https://www.nakaoroshi.or.jp/wp-content/uploads/2016/09/higashimono_seal.png" style="width:100px; display:block; margin:5px 0;">
+            <h4>1. 必吃：三陸鹽竈 Higashimono</h4>
+            <p>9月中-12月限定的極品大目鮪。<br>
+            <small>⚠️ 挑選時請認明下方照片中的貼紙：</small></p>
+            <img src="image_9f42e6.jpg" alt="極品鮪魚 Higashimono">
 
-            <h4>必玩：MY 海鮮丼 (DIY)</h4>
-            <ul>
-                <li><span class="step-num">1</span>先逛市場，購買喜歡的生魚片/食材。</li>
-                <li><span class="step-num">2</span>到 <strong>6號賣場</strong> 購買白飯套餐 (味噌湯+飯)。</li>
-                <li><span class="step-num">3</span>開始組裝自己獨一無二的海鮮丼！</li>
-            </ul>
+            <h4>2. 必玩：MY 海鮮丼 (DIY)</h4>
+            <p>自己挑魚貨，再去買飯配成一碗！</p>
+            <img src="image_9f4363.jpg" alt="DIY 海鮮丼步驟">
+            <p>成品範例與氛圍：</p>
+            <img src="image_9f437f.jpg" alt="DIY 海鮮丼合照">
 
-            <h4>其他選項：BBQ 燒烤</h4>
-            <p>若買了貝類、魚乾，可到 <strong>5號賣場外</strong> 的「My BBQ Terrace」登記烤肉。</p>
+            <h4>3. 其他選項：BBQ 燒烤</h4>
+            <p>在市場買海鮮，去 5 號賣場外烤！</p>
+            <img src="image_9f4328.jpg" alt="BBQ 步驟">
+            <p>燒烤實況：</p>
+            <img src="image_9f4344.jpg" alt="BBQ 食物">
             
-            <p style="margin-top:15px; border-top:1px dashed #ddd; padding-top:10px;">
-                <strong>營業時間：</strong>平日/週六只到 13:00/14:00<br>
-                <small>地址：塩竈市新浜町一丁目20番74号</small>
+            <p style="margin-top:20px; border-top:1px dashed #ddd; padding-top:15px; font-size:13px; color:#777;">
+                <strong>營業時間：</strong><br>
+                平日: 3:00 - 13:00<br>
+                週六: 3:00 - 14:00<br>
+                週日/假日: 6:00 - 14:00<br>
+                <small>(店家營業時間不一，建議中午前抵達)</small>
             </p>
         </div>
     </div>
