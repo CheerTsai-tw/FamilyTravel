@@ -113,10 +113,18 @@
             text-decoration: none;
             font-weight: 600;
             margin-top: 12px;
+            margin-right: 8px;
             transition: background 0.2s;
+            cursor: pointer;
+            border: none;
         }
         .nav-btn:active { background: #E0E4E5; }
         .nav-btn i { margin-right: 6px; }
+
+        .info-btn {
+            background: #FFF3E0;
+            color: #E67E22;
+        }
 
         /* --- 底部導航 --- */
         .bottom-nav {
@@ -147,17 +155,29 @@
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 彈窗樣式 */
+        /* --- 彈窗通用樣式 --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 999;
+            background: rgba(0,0,0,0.6); z-index: 1000;
             display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(2px);
         }
         .modal {
-            background: white; width: 85%; max-width: 400px;
-            border-radius: 16px; padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: white; width: 90%; max-width: 500px; max-height: 85vh;
+            border-radius: 16px; padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            position: relative;
         }
+        .modal-close {
+            position: absolute; top: 15px; right: 15px;
+            font-size: 20px; color: #999; cursor: pointer; padding: 5px;
+        }
+        .modal h3 { margin-top: 0; color: var(--accent-color); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal h4 { margin: 15px 0 5px 0; color: var(--highlight-food); font-size: 15px; }
+        .modal p, .modal li { font-size: 14px; line-height: 1.6; color: #555; }
+        .modal ul { padding-left: 20px; margin: 5px 0; }
+        .step-num { display: inline-block; width: 20px; height: 20px; background: #333; color: white; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -180,7 +200,7 @@
         <div id="view-tools" class="view-section">
             <h2 style="font-size:20px; margin: 10px 0 20px 0; color:var(--text-main);">旅程百寶箱</h2>
             <div class="tools-grid">
-                <div class="tool-card" onclick="showFlightInfo()">
+                <div class="tool-card" onclick="showModal('modal-flight')">
                     <i class="fas fa-plane" style="color:#2C3E50; font-size:28px; margin-bottom:10px;"></i>
                     <h3>航班資訊</h3>
                     <p style="font-size:12px; color:#999;">JX862 / JX863</p>
@@ -215,107 +235,123 @@
         </div>
     </div>
 
-    <div id="modal-flight" class="modal-overlay" onclick="this.style.display='none'">
+    <div id="modal-flight" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal" onclick="event.stopPropagation()">
-            <h3 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">✈️ 航班資訊</h3>
+            <div class="modal-close" onclick="closeAllModals()">&times;</div>
+            <h3>✈️ 航班資訊</h3>
             <div style="margin-bottom:15px;">
                 <div style="font-weight:bold; color:var(--accent-color);">去程 | 12/06 (六)</div>
                 <div style="font-size:14px; margin-top:5px;">
                     <strong>JX862 星宇航空</strong><br>
-                    11:50 TPE 桃園 T1<br>
-                    ⬇ (3h 10m)<br>
-                    16:00 SDJ 仙台
+                    11:50 TPE 桃園 T1 ➔ 16:00 SDJ 仙台
                 </div>
             </div>
             <div>
                 <div style="font-weight:bold; color:var(--accent-color);">回程 | 12/12 (五)</div>
                 <div style="font-size:14px; margin-top:5px;">
                     <strong>JX863 星宇航空</strong><br>
-                    17:15 SDJ 仙台<br>
-                    ⬇ (4h 20m)<br>
-                    20:35 TPE 桃園 T1
+                    17:15 SDJ 仙台 ➔ 20:35 TPE 桃園 T1
                 </div>
             </div>
-            <button onclick="document.getElementById('modal-flight').style.display='none'" style="width:100%; margin-top:20px; padding:10px; background:#f0f0f0; border:none; border-radius:8px;">關閉</button>
+        </div>
+    </div>
+
+    <div id="modal-market" class="modal-overlay" onclick="closeAllModals()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="closeAllModals()">&times;</div>
+            <h3>🍣 鹽釜市場攻略</h3>
+            
+            <h4>必吃：三陸鹽竈 Higashimono</h4>
+            <p>9月中-12月限定的極品大目鮪（メバチマグロ）。<br>
+            <small>⚠️ 挑選認明「三陸塩竈ひがしもの」貼紙。</small></p>
+            <img src="https://www.nakaoroshi.or.jp/wp-content/uploads/2016/09/higashimono_seal.png" style="width:100px; display:block; margin:5px 0;">
+
+            <h4>必玩：MY 海鮮丼 (DIY)</h4>
+            <ul>
+                <li><span class="step-num">1</span>先逛市場，購買喜歡的生魚片/食材。</li>
+                <li><span class="step-num">2</span>到 <strong>6號賣場</strong> 購買白飯套餐 (味噌湯+飯)。</li>
+                <li><span class="step-num">3</span>開始組裝自己獨一無二的海鮮丼！</li>
+            </ul>
+
+            <h4>其他選項：BBQ 燒烤</h4>
+            <p>若買了貝類、魚乾，可到 <strong>5號賣場外</strong> 的「My BBQ Terrace」登記烤肉。</p>
+            
+            <p style="margin-top:15px; border-top:1px dashed #ddd; padding-top:10px;">
+                <strong>營業時間：</strong>平日/週六只到 13:00/14:00<br>
+                <small>地址：塩竈市新浜町一丁目20番74号</small>
+            </p>
         </div>
     </div>
 
     <script>
-        // --- 核心資料區 (您餵給我的資料都在這) ---
+        // --- 核心資料區 ---
         const itineraryData = {
             "day1": { 
-                date: "12/06 (六)", 
-                loc: "仙台市", 
-                temp: "3°C - 8°C",
+                date: "12/06 (六)", loc: "仙台市", temp: "3°C - 8°C",
                 events: [
-                    { 
-                        time: "09:30", 
-                        title: "抵達桃園機場 T1", 
-                        type: "transport", 
-                        note: "建議提早 2.5 小時抵達櫃檯報到。<br>備註：星宇航空位於第一航廈。", 
-                        nav: "桃園機場第一航廈" 
-                    },
-                    { 
-                        time: "11:50", 
-                        title: "JX862 起飛 🛫", 
-                        type: "flight", 
-                        note: "機型：A330-900NEO<br>飛行時間：3小時10分<br>目的地：仙台 (SDJ)", 
-                        nav: "" 
-                    },
-                    { 
-                        time: "16:00", 
-                        title: "抵達仙台機場", 
-                        type: "transport", 
-                        note: "入境審查約需 40-60 分鐘。<br>領完行李請前往 2F 連接通道搭乘電車。", 
-                        nav: "仙台空港駅" 
-                    },
-                    { 
-                        time: "17:08", 
-                        title: "搭乘仙台空港線", 
-                        type: "transport", 
-                        note: "<b>最佳班次：17:08 發 → 17:33 著</b><br>(備用班次：17:39 發 → 18:04 著)<br>前往：JR 仙台站", 
-                        nav: "" 
-                    },
-                    { 
-                        time: "18:00", 
-                        title: "飯店 Check-in", 
-                        type: "hotel", 
-                        note: "<b>Hotel Livemax Sendai Hirose-dori</b><br>預約代號：<span class='tag code'>1628181511</span><br>電話：022-263-6400<br>從仙台站步行約 15 分或搭計程車。", 
-                        nav: "ホテルリブマックス仙台広瀬通" 
-                    },
-                    { 
-                        time: "19:00", 
-                        title: "晚餐推薦：仙台牛舌", 
-                        type: "food", 
-                        note: "飯店附近名店推薦：<br>1. <span class='tag eat'>味太助 本店</span> (發源店)<br>2. <span class='tag eat'>牛舌料理 閣</span> (評價高)<br>記得點厚切牛舌定食！", 
-                        nav: "味太助 本店" 
-                    }
+                    { time: "09:30", title: "抵達桃園機場 T1", type: "transport", note: "建議提早 2.5 小時報到。星宇航空位於第一航廈。", nav: "桃園機場第一航廈" },
+                    { time: "11:50", title: "JX862 起飛 🛫", type: "flight", note: "機型：A330-900NEO (3h 10m)", nav: "" },
+                    { time: "16:00", title: "抵達仙台機場", type: "transport", note: "入境約需 40-60 分鐘。領完行李前往 2F 搭乘電車。", nav: "仙台空港駅" },
+                    { time: "17:08", title: "搭乘仙台空港線", type: "transport", note: "17:08 發 → 17:33 著 (仙台站)<br>備用：17:39 發", nav: "" },
+                    { time: "18:00", title: "飯店 Check-in", type: "hotel", note: "<b>Hotel Livemax Sendai Hirose-dori</b><br>代號：<span class='tag code'>1628181511</span><br>電話：022-263-6400", nav: "ホテルリブマックス仙台広瀬通" },
+                    { time: "19:00", title: "晚餐推薦：仙台牛舌", type: "food", note: "推薦：<span class='tag eat'>味太助</span> 或 <span class='tag eat'>牛舌閣</span>", nav: "味太助 本店" }
                 ]
             },
-            "day2": { date: "12/07 (日)", loc: "松島灣", temp: "2°C - 7°C", events: [] },
+            "day2": { 
+                date: "12/07 (日)", loc: "松島灣", temp: "2°C - 7°C",
+                events: [
+                    { 
+                        time: "09:00", title: "前往租車處", type: "transport", 
+                        note: "飯店出發步行約 10-15 分鐘。<br>目標：ORIX 仙台站前店 (西口)。", 
+                        nav: "オリックスレンタカー 仙台駅前店" 
+                    },
+                    { 
+                        time: "10:00", title: "辦理租車 & 啟程", type: "transport", 
+                        note: "<b>⚠️ 必備：護照、台灣駕照、日文譯本</b><br>目的地：鹽釜水產市場 (車程約40分)。", 
+                        nav: "塩釜水産物仲卸市場" 
+                    },
+                    { 
+                        time: "10:50", title: "鹽釜水產仲卸市場", type: "food", 
+                        note: "<b><span class='tag eat'>午餐</span> DIY 海鮮丼 & 燒烤</b><br>必吃：極品大目鮪 (Higashimono)<br>請點下方按鈕看攻略。", 
+                        nav: "",
+                        action: "modal-market", actionText: "📖 市場攻略 & 鮪魚介紹"
+                    },
+                    { 
+                        time: "13:30", title: "前往松島", type: "transport", 
+                        note: "車程約 20 分鐘。前往松島海岸。", 
+                        nav: "松島海岸" 
+                    },
+                    { 
+                        time: "14:00", title: "松島島巡觀光船", type: "sightseeing", 
+                        note: "仁王丸行程 (約 50 分鐘)<br>飽覽松島灣美景。", 
+                        nav: "松島遊覧船" 
+                    },
+                    { 
+                        time: "15:00", title: "五大堂 & 瑞嚴寺", type: "sightseeing", 
+                        note: "松島的象徵，連結小島的紅橋。", 
+                        nav: "五大堂" 
+                    },
+                    { 
+                        time: "16:00", title: "飯店 Check-in", type: "hotel", 
+                        note: "<b>小松館好風亭</b><br>代號：<span class='tag code'>110 443 142*10</span><br>電話：022-354-5065", 
+                        nav: "小松館 好風亭" 
+                    },
+                    { 
+                        time: "17:00", title: "松島離宮 / 晚餐", type: "sightseeing", 
+                        note: "夜間點燈或周邊晚餐。", 
+                        nav: "宮城県松島離宮" 
+                    }
+                ] 
+            },
             "day3": { date: "12/08 (一)", loc: "銀山溫泉", temp: "-1°C - 4°C", events: [] },
             "day4": { date: "12/09 (二)", loc: "藏王溫泉", temp: "-3°C - 2°C", events: [] },
             "day5": { date: "12/10 (三)", loc: "米澤", temp: "0°C - 5°C", events: [] },
             "day6": { date: "12/11 (四)", loc: "狐狸村/仙台", temp: "2°C - 7°C", events: [] },
             "day7": { 
-                date: "12/12 (五)", 
-                loc: "回程", 
-                temp: "4°C - 9°C", 
+                date: "12/12 (五)", loc: "回程", temp: "4°C - 9°C", 
                 events: [
-                    { 
-                        time: "15:15", 
-                        title: "抵達仙台機場", 
-                        type: "transport", 
-                        note: "建議提早 2 小時抵達辦理登機。<br>最後採買伴手禮 (毛豆奶昔、萩之月)。", 
-                        nav: "仙台空港" 
-                    },
-                    { 
-                        time: "17:15", 
-                        title: "JX863 起飛 🛫", 
-                        type: "flight", 
-                        note: "機型：A330-900NEO<br>飛行時間：4小時20分<br>目的地：TPE (20:35 抵達)", 
-                        nav: "" 
-                    }
+                    { time: "15:15", title: "抵達仙台機場", type: "transport", note: "提早 2 小時抵達。最後採買伴手禮。", nav: "仙台空港" },
+                    { time: "17:15", title: "JX863 起飛 🛫", type: "flight", note: "A330-900NEO (4h 20m) ➔ TPE", nav: "" }
                 ] 
             }
         };
@@ -356,10 +392,8 @@
             const container = document.getElementById('cards-container');
             const dayInfo = itineraryData[dayKey];
             
-            // 更新天氣 header
             document.getElementById('weather-loc').innerText = dayInfo.loc;
             document.getElementById('weather-desc').innerText = `氣溫預測: ${dayInfo.temp}`;
-
             container.innerHTML = '';
 
             if(!dayInfo.events || dayInfo.events.length === 0) {
@@ -371,33 +405,49 @@
                 const card = document.createElement('div');
                 card.className = `card ${event.type}`;
                 
-                let navButtonHtml = '';
+                let btnsHtml = '';
+                
+                // 導航按鈕
                 if (event.nav) {
                     const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.nav)}`;
-                    navButtonHtml = `
-                        <a href="${mapLink}" target="_blank" class="nav-btn">
-                            <i class="fas fa-location-arrow"></i> 導航：${event.nav}
-                        </a>`;
+                    btnsHtml += `
+                        <button onclick="window.open('${mapLink}', '_blank')" class="nav-btn">
+                            <i class="fas fa-location-arrow"></i> 導航
+                        </button>`;
+                }
+
+                // 特殊動作按鈕 (如攻略)
+                if (event.action) {
+                    btnsHtml += `
+                        <button onclick="showModal('${event.action}')" class="nav-btn info-btn">
+                            ${event.actionText}
+                        </button>`;
                 }
                 
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="card-time">${event.time}</div>
-                        ${event.type === 'flight' ? '<i class="fas fa-plane" style="color:#2C3E50"></i>' : ''}
-                        ${event.type === 'hotel' ? '<i class="fas fa-bed" style="color:#9B59B6"></i>' : ''}
+                        ${getIcon(event.type)}
                     </div>
                     <div class="card-title">${event.title}</div>
                     <div class="card-meta">${event.note}</div>
-                    ${navButtonHtml}
+                    <div style="margin-top:5px;">${btnsHtml}</div>
                 `;
                 container.appendChild(card);
             });
         }
 
+        function getIcon(type) {
+            if(type === 'flight') return '<i class="fas fa-plane" style="color:#2C3E50"></i>';
+            if(type === 'hotel') return '<i class="fas fa-bed" style="color:#9B59B6"></i>';
+            if(type === 'food') return '<i class="fas fa-utensils" style="color:#D98E73"></i>';
+            if(type === 'sightseeing') return '<i class="fas fa-camera" style="color:#4A6C74"></i>';
+            return '<i class="fas fa-car" style="color:#AAA"></i>';
+        }
+
         function switchView(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
             document.getElementById(`view-${viewName}`).classList.add('active');
             
             if(viewName === 'itinerary') {
@@ -409,8 +459,12 @@
             }
         }
 
-        function showFlightInfo() {
-            document.getElementById('modal-flight').style.display = 'flex';
+        function showModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
         }
 
         init();
